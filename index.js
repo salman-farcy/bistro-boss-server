@@ -32,6 +32,12 @@ async function run() {
           const revewsCollection = client.db("BistroBoss").collection("revews");
           const cartsCollection = client.db("BistroBoss").collection("carts");
 
+          //get 
+          app.get('/users', async (req, res) => {
+               const result = await userCollection.find().toArray()
+               res.send(result)
+          })
+
           //post user
           app.post('/users', async (req, res) => {
                const user = req.body;
