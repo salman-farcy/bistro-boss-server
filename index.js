@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, Admin } = require('mongodb');
 require('dotenv').config()
 const cors = require('cors');
 const port = process.env.PORT;
@@ -32,13 +32,13 @@ async function run() {
           const revewsCollection = client.db("BistroBoss").collection("revews");
           const cartsCollection = client.db("BistroBoss").collection("carts");
 
-          //get 
+          //user get 
           app.get('/users', async (req, res) => {
                const result = await userCollection.find().toArray()
                res.send(result)
           })
 
-          //post user
+          //user post user
           app.post('/users', async (req, res) => {
                const user = req.body;
                //
@@ -51,12 +51,34 @@ async function run() {
                res.send(result)
           })
 
+          //admin korar jonno
+          app.patch('/users/admin/:id', async (req, res) => {
+               const id = req.params.id;
+               const filter = {_id: new ObjectId(id)};
+               const updatedDoc = {
+                    $set: {
+                         role: 'admin'
+                    }
+               }
+               const result = await userCollection.updateOne(filter, updatedDoc)
+               res.send(result)
+          })
 
+          //users Delets
+          app.delete('/users/:id', async (req, res)=>{
+               const id = req.params.id
+               const query = {_id: new ObjectId(id) }
+               const result = await userCollection.deleteOne(query)
+               res.send(result)
+          })
+
+          // menu get
           app.get('/menu', async (req, res) => {
                const result = await menuCollection.find().toArray();
                res.send(result)
           })
 
+          //revews get
           app.get('/revews', async (req, res) => {
                const result = await revewsCollection.find().toArray();
                res.send(result)
@@ -72,14 +94,14 @@ async function run() {
                res.send(result);
           })
 
-          // post 
+          //carts post 
           app.post('/carts', async(req, res) => {
                const cartItem = req.body;
                const reault = await cartsCollection.insertOne(cartItem);
                res.send(reault)
           })
 
-          // Delete
+          // carts Delete
           app.delete('/carts/:id', async(req, res) => {
                const id = req.params.id;
                const query = {_id: new ObjectId(id)}
