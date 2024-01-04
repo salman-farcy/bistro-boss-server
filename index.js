@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const { MongoClient, ServerApiVersion, ObjectId, Admin } = require('mongodb');
 require('dotenv').config()
+const jwt = require('jsonwebtoken')
 const cors = require('cors');
 const port = process.env.PORT;
 
@@ -25,15 +26,26 @@ const client = new MongoClient(uri, {
 async function run() {
      try {
           // Connect the client to the server	(optional starting in v4.7)
-          await client.connect(); 
+          await client.connect();
 
           const userCollection = client.db("BistroBoss").collection("users");
           const menuCollection = client.db("BistroBoss").collection("menu");
           const revewsCollection = client.db("BistroBoss").collection("revews");
           const cartsCollection = client.db("BistroBoss").collection("carts");
 
+          //jwt Related api
+          app.post('/jwt', async (req, res) => {
+               const user = req.body;
+               const token = jwt.sign(user,
+                    process.env.ACCESS_TOKEN_SECRET, 
+                    { expiresIn: '1h' })
+               res.send({ token  })
+               
+          })
+
           //user get 
           app.get('/users', async (req, res) => {
+               console.log(req.headers);
                const result = await userCollection.find().toArray()
                res.send(result)
           })
@@ -42,10 +54,10 @@ async function run() {
           app.post('/users', async (req, res) => {
                const user = req.body;
                //
-               const query = {email: user.email}
+               const query = { email: user.email }
                const existingUser = await userCollection.findOne(query)
-               if(existingUser){
-                    return res.send({message: 'user already exists', insertedId: null})
+               if (existingUser) {
+                    return res.send({ message: 'user already exists', insertedId: null })
                }
                const result = await userCollection.insertOne(user)
                res.send(result)
@@ -54,7 +66,7 @@ async function run() {
           //admin korar jonno
           app.patch('/users/admin/:id', async (req, res) => {
                const id = req.params.id;
-               const filter = {_id: new ObjectId(id)};
+               const filter = { _id: new ObjectId(id) };
                const updatedDoc = {
                     $set: {
                          role: 'admin'
@@ -65,9 +77,9 @@ async function run() {
           })
 
           //users Delets
-          app.delete('/users/:id', async (req, res)=>{
+          app.delete('/users/:id', async (req, res) => {
                const id = req.params.id
-               const query = {_id: new ObjectId(id) }
+               const query = { _id: new ObjectId(id) }
                const result = await userCollection.deleteOne(query)
                res.send(result)
           })
@@ -89,22 +101,22 @@ async function run() {
           //get
           app.get('/carts', async (req, res) => {
                const email = req.query.email;
-               const query = {email: email}
+               const query = { email: email }
                const result = await cartsCollection.find(query).toArray();
                res.send(result);
           })
 
           //carts post 
-          app.post('/carts', async(req, res) => {
+          app.post('/carts', async (req, res) => {
                const cartItem = req.body;
                const reault = await cartsCollection.insertOne(cartItem);
                res.send(reault)
           })
 
           // carts Delete
-          app.delete('/carts/:id', async(req, res) => {
+          app.delete('/carts/:id', async (req, res) => {
                const id = req.params.id;
-               const query = {_id: new ObjectId(id)}
+               const query = { _id: new ObjectId(id) }
                const result = await cartsCollection.deleteOne(query);
                res.send(result);
           })
