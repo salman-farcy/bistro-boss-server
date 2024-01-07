@@ -110,7 +110,7 @@ async function run() {
           })
 
           //admin korar jonno
-          app.patch('/users/admin/:id', async (req, res) => {
+          app.patch('/users/admin/:id',verifToken, verifyAdmin, async (req, res) => {
                const id = req.params.id;
                const filter = { _id: new ObjectId(id) };
                const updatedDoc = {
@@ -123,7 +123,7 @@ async function run() {
           })
 
           //users Delets
-          app.delete('/users/:id', async (req, res) => {
+          app.delete('/users/:id', verifToken, verifyAdmin, async (req, res) => {
                const id = req.params.id
                const query = { _id: new ObjectId(id) }
                const result = await userCollection.deleteOne(query)
