@@ -130,6 +130,14 @@ async function run() {
                res.send(result)
           })
 
+          //menu Deleted
+          app.delete('/menu/:id', verifToken, verifyAdmin, async (req, res) => {
+               const id = req.params.id
+               const query = {_id: new ObjectId(id)}
+               const result = await menuCollection.deleteOne(query)
+               res.send(result);
+          })
+
           // menu get
           app.get('/menu', async (req, res) => {
                const result = await menuCollection.find().toArray();
