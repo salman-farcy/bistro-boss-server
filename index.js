@@ -14,7 +14,6 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.rb5g6hh.mongodb.net/?retryWrites=true&w=majority`;
 
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
      serverApi: {
@@ -210,6 +209,16 @@ async function run() {
                const result = await cartsCollection.deleteOne(query);
                res.send(result);
           })
+          
+          //
+          app.get('/payments/:email', verifToken, async (req, res) => {
+               const query = {email: req.params.email}
+               if(req.params.email !== req.decoded.email){
+                    return res.status(403).send({message: 'forbiden access'})
+               }
+               const result = await paymentCollection.find(query).toArray()
+               res.send(result);
+          })
 
           //Payment intent
           app.post('/create-payment-intent', async (req, res) => {
@@ -236,7 +245,7 @@ async function run() {
 
                //carefully delete each item from the cart 
                console.log('payment info', payment);
-               const query = {_id: {
+               const query = { _id: {
                     $in: payment.cartIds.map(id => new ObjectId(id))
                }};
 
